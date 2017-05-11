@@ -52,7 +52,7 @@ export default class Recordbtns extends Component {
                 <NumberInput defaultValue={1} />
               </FormField>
               <Footer pad={{ 'vertical': 'medium' }}>
-                <Button label='Create Record' type='submit' primary={true} onClick={console.log('sumbit')} />
+                <Button label='Create' type='submit' primary={true} onClick={console.log('sumbit')} />
               </Footer>
             </Form>
           </Box>
