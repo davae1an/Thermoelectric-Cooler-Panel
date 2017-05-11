@@ -37,6 +37,10 @@ export default class Reports extends Component {
     console.log('deleting record')
   }
 
+  selectedItem(event) {
+    console.log(event)
+  }
+
   populatelist() {
     liststuffz.listz.length = 0
     axios.get(this.props.checker.apiserver + '/records')
@@ -63,7 +67,7 @@ export default class Reports extends Component {
 
 
     var ListItemz = liststuffz.listz.map(list => (
-      <ListItem key={list.id}>
+      <ListItem key={list.id} onClick={this.selectedItem.bind(this)}>
         {list.name}
       </ListItem>))
 
@@ -83,7 +87,9 @@ export default class Reports extends Component {
             </Box>
             <Box colorIndex='light-2'>
               <Animate visible={liststuffz.visible} enter={{ 'animation': 'fade', 'duration': 1000, 'delay': 0 }} keep={true}>
-                <List selectable={true}>
+                <List selectable={true} onSelect={(selected) => {
+                                                    console.log(selected)
+                                                  }}>
                   {ListItemz}
                 </List>
               </Animate>

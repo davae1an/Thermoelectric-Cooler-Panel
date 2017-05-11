@@ -108,7 +108,7 @@ def getTemps():
                 }, sort_keys=False, indent=4))
 
             if Status.RecordData is True:
-                print('Sendind data to database')
+                print('Sendind data to express js')
                 socketIO.emit('tempadd', json.dumps(
                     {
                         'tempinside': str(inside_temp_c),
@@ -156,6 +156,7 @@ def radiatorsys():
             time.sleep(120)
             print('Finish sleep')
             Pump.off()
+            print('pump off')
             Status.pumpCheck == 'OFF'
             if RadFan.is_active is True:
                 RadFan.off()
