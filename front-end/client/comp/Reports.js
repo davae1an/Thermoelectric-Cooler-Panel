@@ -11,16 +11,15 @@ import { observer, computed } from 'mobx-react';
 import Animate from 'grommet/components/Animate';
 import Recordctrl from './subcomp/recordctrl'
 
-class ListStuff {
-  @observable listz = []
-  @observable visible = false
-
-}
-
-var liststuffz = new ListStuff();
 
 @observer
 export default class Reports extends Component {
+
+  @observable listz = []
+  @observable tablerows = []
+  @observable visible = false
+  @observable listid = undefined
+  selected = 0
 
 
   constructor(props) {
@@ -35,19 +34,62 @@ export default class Reports extends Component {
 
   deletedata() {
     console.log('deleting record')
+    var a = this;
+    axios.delete(this.props.checker.apiserver + '/records/' + this.listid.toString())
+      .then(function(response) {
+        a.listid = undefined
+        a.populatelist()
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+
   }
 
-  selectedItem(event) {
-    console.log(event)
+
+
+  newrecord() {
+    if (Recorddata.modalnew) {
+      return (
+        <Layer onClose={() => {
+                  Recorddata.modalnew = false
+                }} closer={true} align="center">
+          <Box pad='medium'>
+            <Form>
+              <Heading tag='h3'>
+                New Record
+              </Heading>
+              <FormField label='Name:'>
+                <TextInput />
+              </FormField>
+              <FormField label='interval(seconds):'>
+                <NumberInput defaultValue={1} />
+              </FormField>
+              <Footer pad={{ 'vertical': 'medium' }}>
+                <Button label='Create' type='submit' primary={true} onClick={console.log('sumbit')} />
+              </Footer>
+            </Form>
+          </Box>
+        </Layer>
+      );
+    }
+  }
+
+  selectedItem(e) {
+    this.listid = e
+    console.log(this.listid)
+    this.populatetable()
   }
 
   populatelist() {
-    liststuffz.listz.length = 0
+    console.log('populating list')
+    this.listz.length = 0
+    var a = this;
     axios.get(this.props.checker.apiserver + '/records')
       .then(function(response) {
         response.data.map(function(data) {
 
-          liststuffz.listz.push({
+          a.listz.push({
             id: data.rec_id,
             name: data.name
           })
@@ -58,7 +100,33 @@ export default class Reports extends Component {
       .catch(function(error) {
         console.log(error);
       });
-    liststuffz.visible = true
+    this.visible = true
+  }
+
+  populatetable() {
+    console.log('populating table')
+    var a = this
+    if (this.listid != undefined) {
+      this.tablerows.length = 0
+      axios.get(this.props.checker.apiserver + '/pidata/' + this.listid.toString())
+        .then(function(response) {
+          response.data.map(function(data) {
+
+            a.tablerows.push({
+              id: data.rec_id,
+              outside: data.outside,
+              inside: data.inside,
+              pump: data.pump,
+              date: data.date
+            })
+
+
+          })
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    }
   }
 
 
@@ -66,10 +134,29 @@ export default class Reports extends Component {
 
 
 
-    var ListItemz = liststuffz.listz.map(list => (
-      <ListItem key={list.id} onClick={this.selectedItem.bind(this)}>
+    var ListItemz = this.listz.map(list => (
+      <ListItem key={list.id} onClick={this.selectedItem.bind(this, list.id)}>
         {list.name}
       </ListItem>))
+
+    var TableRowdata = this.tablerows.map(row => (
+      <TableRow>
+        <td>
+          {row.id}
+        </td>
+        <td>
+          {row.outside}
+        </td>
+        <td>
+          {row.inside}
+        </td>
+        <td>
+          {row.pump}
+        </td>
+        <td>
+          {row.date}
+        </td>
+      </TableRow>))
 
 
     return (
@@ -86,10 +173,8 @@ export default class Reports extends Component {
               <Button icon={< RefreshIcon />} accent={true} onClick={this.populatelist.bind(this)} />
             </Box>
             <Box colorIndex='light-2'>
-              <Animate visible={liststuffz.visible} enter={{ 'animation': 'fade', 'duration': 1000, 'delay': 0 }} keep={true}>
-                <List selectable={true} onSelect={(selected) => {
-                                                    console.log(selected)
-                                                  }}>
+              <Animate visible={this.visible} enter={{ 'animation': 'fade', 'duration': 1000, 'delay': 0 }} keep={true}>
+                <List selectable={true}>
                   {ListItemz}
                 </List>
               </Animate>
@@ -101,32 +186,9 @@ export default class Reports extends Component {
             </Header>
             <Box>
               <Table>
-                <TableHeader labels={['Name', 'Note']} sortIndex={0} sortAscending={true} />
+                <TableHeader labels={['ID', 'Outside Temp.', 'Inside Temp.', 'Pump Housing Temp.', 'Time']} />
                 <tbody>
-                  <TableRow>
-                    <td>
-                      Alan
-                    </td>
-                    <td>
-                      plays accordion
-                    </td>
-                  </TableRow>
-                  <TableRow>
-                    <td>
-                      Chris
-                    </td>
-                    <td>
-                      drops the mic
-                    </td>
-                  </TableRow>
-                  <TableRow>
-                    <td>
-                      Tracy
-                    </td>
-                    <td>
-                      travels the world
-                    </td>
-                  </TableRow>
+                  {TableRowdata}
                 </tbody>
               </Table>
             </Box>

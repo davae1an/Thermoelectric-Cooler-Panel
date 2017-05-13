@@ -204,8 +204,17 @@ app.get('/records/:id', function(req, res) {
   });
 })
 
+app.delete('/records/:id', function(req, res) {
+  db.serialize(function() {
+    db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id)
+    db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id)
+    res.send('deleted')
+  })
+});
+
+
 app.get('/pidata/:id', function(req, res) {
-  db.all("SELECT * FROM pidata WHERE  rec_id=(?)", req.params.id, function(err, rows) {
+  db.all('SELECT * FROM pidata WHERE  rec_id=(?)', req.params.id, function(err, rows) {
     res.send(JSON.stringify(rows))
   });
 })
@@ -215,6 +224,7 @@ app.get('/pidata', function(req, res) {
     res.send(JSON.stringify(rows))
   });
 })
+
 
 app.get('/settingz', function(req, res) {
   db.all("SELECT * FROM settingz", function(err, rows) {

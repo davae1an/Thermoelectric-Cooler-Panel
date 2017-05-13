@@ -34,6 +34,12 @@ export default class Recordbtns extends Component {
     console.log('stoping record')
   }
 
+  addrecord(event) {
+    event.preventDefault()
+    console.log('test sumbit')
+    Recorddata.modalnew = false
+  }
+
   newrecord() {
     if (Recorddata.modalnew) {
       return (
@@ -41,7 +47,7 @@ export default class Recordbtns extends Component {
                   Recorddata.modalnew = false
                 }} closer={true} align="center">
           <Box pad='medium'>
-            <Form>
+            <Form onSubmit={this.addrecord.bind(this)}>
               <Heading tag='h3'>
                 New Record
               </Heading>
@@ -52,7 +58,7 @@ export default class Recordbtns extends Component {
                 <NumberInput defaultValue={1} />
               </FormField>
               <Footer pad={{ 'vertical': 'medium' }}>
-                <Button label='Create' type='submit' primary={true} onClick={console.log('sumbit')} />
+                <Button label='Create' type='submit' primary={true} />
               </Footer>
             </Form>
           </Box>
