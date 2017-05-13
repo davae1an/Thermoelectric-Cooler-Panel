@@ -208,8 +208,9 @@ app.delete('/records/:id', function(req, res) {
   db.serialize(function() {
     db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id)
     db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id)
-    res.send('deleted')
+
   })
+  res.send('deleted')
 });
 
 
