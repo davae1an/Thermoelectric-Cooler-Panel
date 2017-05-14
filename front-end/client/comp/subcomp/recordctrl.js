@@ -41,7 +41,7 @@ export default class Recordctrl extends Component {
             {' '}
             {<Status value='ok' />}
           </Heading>
-          <Recordbtns checker={this.props.checker} socketz={this.props.socketz} />
+          <Recordbtns pop={this.props.pop} checker={this.props.checker} socketz={this.props.socketz} />
         </Box>
       )
     } else {
@@ -54,7 +54,7 @@ export default class Recordctrl extends Component {
               {<Status value='critical' />}
             </Heading>
           </Box>
-          <Recordbtns checker={this.props.checker} socketz={this.props.socketz} />
+          <Recordbtns pop={this.props.pop} checker={this.props.checker} socketz={this.props.socketz} />
         </Box>
 
       )

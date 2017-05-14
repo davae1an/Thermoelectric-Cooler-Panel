@@ -20,7 +20,7 @@ export default class Reports extends Component {
   @observable visible = false
   @observable modaldelete = undefined
   listid = undefined
-  currentrecord = undefined
+  @observable currentrecord = undefined
   selected = 0
 
 
@@ -42,6 +42,7 @@ export default class Reports extends Component {
       .then(function(response) {
         a.listid = undefined
         a.currentrecord = undefined
+        a.modaldelete = false
         a.populatelist()
       })
       .catch(function(error) {
@@ -115,7 +116,7 @@ export default class Reports extends Component {
       .catch(function(error) {
         console.log(error);
       });
-    this.currentrecord = undefined
+    // this.currentrecord = undefined
     this.visible = true
   }
 
@@ -201,7 +202,7 @@ export default class Reports extends Component {
           </Box>
           <Box direction='column'>
             <Header size='small' colorIndex='neutral-4'>
-              <Recordctrl checker={this.props.checker} socketz={this.props.socketz} />
+              <Recordctrl pop={this.populatelist} checker={this.props.checker} socketz={this.props.socketz} />
             </Header>
             <Box>
               <Table>

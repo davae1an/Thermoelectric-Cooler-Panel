@@ -35,9 +35,9 @@ export default class Recordbtns extends Component {
     console.log('stoping record')
   }
 
-  addrecord(event) {
-    event.preventDefault()
-    Recorddata.modalnew = false
+  addrecord() {
+    // event.preventDefault()
+
     if (Recorddata.newrname != undefined && Recorddata.interval != undefined) {
       if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
         axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
@@ -45,17 +45,19 @@ export default class Recordbtns extends Component {
 
             Recorddata.newrname = undefined
             Recorddata.interval = undefined
+            Recorddata.modalnew = false
+            // a.props.pop()
+
           })
           .catch(function(error) {
             console.log(error);
+            Recorddata.modalnew = false
           });
-
-
-
 
       }
     } else {
       console.log('You did not submit form properly')
+      Recorddata.modalnew = false
     }
   }
 
@@ -71,7 +73,7 @@ export default class Recordbtns extends Component {
               <Heading tag='h3'>
                 New Record
               </Heading>
-              <FormField label='Name:' htmlFor='namez'>
+              <FormField label='Name:'>
                 <TextInput id='namez' onDOMChange={(event) => {
                                                      Recorddata.newrname = event.target.value
                                                    }} />
@@ -92,7 +94,6 @@ export default class Recordbtns extends Component {
   }
 
   checkforpi() {
-
     if (this.props.checker.isConnected == true) {
       console.log('sending ping to pi')
       this.props.socketz.checkpi()

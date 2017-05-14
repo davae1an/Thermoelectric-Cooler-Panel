@@ -13,7 +13,7 @@ db.serialize(function() {
   console.log('Creating Tables for SQlite3 Database if no Exists')
   db.run('PRAGMA foreign_keys = ON')
   db.run('CREATE TABLE IF NOT EXISTS pirecords (' +
-    'rec_id INTEGER PRIMARY KEY, name TEXT, date TEXT)')
+    'rec_id INTEGER PRIMARY KEY, name TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)')
   db.run('CREATE TABLE IF NOT EXISTS pidata (' +
     'outside TEXT, inside TEXT, pump TEXT, date TEXT, rec_id INTEGER,' +
     'FOREIGN KEY(rec_id) REFERENCES pirecords(rec_id))')
@@ -206,22 +206,45 @@ app.get('/records/:id', function(req, res) {
 
 app.post('/records/:name/:interval', function(req, res) {
   db.serialize(function() {
-    db.run('INSERT INTO pirecords VALUES ((?), datetime(' + 'now' + '))', req.params.name)
-    db.run('UPDATE settingz SET value = (?) WHERE setname =' + 'currentrecord', req.params.name)
-    db.run('UPDATE settingz SET value = (?) WHERE setname =' + 'interval', req.params.interval)
-    db.run('UPDATE settingz SET value =' + 'true' + 'WHERE setname =' + 'RecordData')
+    db.run('INSERT INTO pirecords (name) VALUES (?)', req.params.name, function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
+    db.run('UPDATE settingz SET value = (?) WHERE setname = (?)', [req.params.name, 'currentrecord'], function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
+    db.run('UPDATE settingz SET value = (?) WHERE setname = (?)', [req.params.interval, 'interval'], function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
+    db.run('UPDATE settingz SET value =' + 'true' + 'WHERE setname =(?)', 'RecordData', function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
   })
+
 })
-
-
-
 
 
 
 app.delete('/records/:id', function(req, res) {
   db.serialize(function() {
-    db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id)
-    db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id)
+    db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id, function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
+    db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id, function(error) {
+      if (error) {
+
+        console.log(error)
+      }
+    })
 
   })
   res.send('deleted')
