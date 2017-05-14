@@ -204,6 +204,20 @@ app.get('/records/:id', function(req, res) {
   });
 })
 
+app.post('/records/:name/:interval', function(req, res) {
+  db.serialize(function() {
+    db.run('INSERT INTO pirecords VALUES ((?), datetime(' + 'now' + '))', req.params.name)
+    db.run('UPDATE settingz SET value = (?) WHERE setname =' + 'currentrecord', req.params.name)
+    db.run('UPDATE settingz SET value = (?) WHERE setname =' + 'interval', req.params.interval)
+    db.run('UPDATE settingz SET value =' + 'true' + 'WHERE setname =' + 'RecordData')
+  })
+})
+
+
+
+
+
+
 app.delete('/records/:id', function(req, res) {
   db.serialize(function() {
     db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id)

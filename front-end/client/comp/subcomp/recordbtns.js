@@ -7,11 +7,13 @@ import NewIcon from 'grommet/components/icons/base/New';
 import StopIcon from 'grommet/components/icons/base/Stop';
 import axios from 'axios';
 
-
+// I never understood forms so hacked through it with states =p
 class Recordinfo {
   @observable isRecording = false
   @observable RecordName = ''
   @observable modalnew = undefined
+  newrname = undefined
+  interval = undefined
 }
 
 var Recorddata = new Recordinfo();
@@ -29,18 +31,36 @@ export default class Recordbtns extends Component {
   }
 
 
-
   stoprecord() {
     console.log('stoping record')
   }
 
   addrecord(event) {
     event.preventDefault()
-    console.log('test sumbit')
     Recorddata.modalnew = false
+    if (Recorddata.newrname != undefined && Recorddata.interval != undefined) {
+      if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
+        axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
+          .then(function(response) {
+
+            Recorddata.newrname = undefined
+            Recorddata.interval = undefined
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+
+
+
+
+      }
+    } else {
+      console.log('You did not submit form properly')
+    }
   }
 
   newrecord() {
+
     if (Recorddata.modalnew) {
       return (
         <Layer onClose={() => {
@@ -51,11 +71,15 @@ export default class Recordbtns extends Component {
               <Heading tag='h3'>
                 New Record
               </Heading>
-              <FormField label='Name:'>
-                <TextInput />
+              <FormField label='Name:' htmlFor='namez'>
+                <TextInput id='namez' onDOMChange={(event) => {
+                                                     Recorddata.newrname = event.target.value
+                                                   }} />
               </FormField>
-              <FormField label='interval(seconds):'>
-                <NumberInput defaultValue={1} />
+              <FormField label='interval(seconds):' htmlFor='intervalz'>
+                <NumberInput id='intervalz' defaultValue={0} onChange={(event) => {
+                                                                         Recorddata.interval = event.target.value
+                                                                       }} />
               </FormField>
               <Footer pad={{ 'vertical': 'medium' }}>
                 <Button label='Create' type='submit' primary={true} />

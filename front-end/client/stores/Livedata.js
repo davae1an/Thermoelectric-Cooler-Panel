@@ -22,7 +22,6 @@ class Livedata {
   apiserver = 'http://localhost:3000'
 
 
-
 }
 
 var store = window.store = new Livedata();

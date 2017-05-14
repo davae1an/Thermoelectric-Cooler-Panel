@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Box, Label, Header, Button, TableHeader, Table, TableRow } from 'grommet';
+import { Box, Label, Header, Button, TableHeader, Table, TableRow, Layer, Form, FormField, Heading, Footer, TextInput, NumberInput } from 'grommet';
 import Split from 'grommet/components/Split';
 import List from 'grommet/components/List';
 import ListItem from 'grommet/components/ListItem';
@@ -18,7 +18,9 @@ export default class Reports extends Component {
   @observable listz = []
   @observable tablerows = []
   @observable visible = false
-  @observable listid = undefined
+  @observable modaldelete = undefined
+  listid = undefined
+  currentrecord = undefined
   selected = 0
 
 
@@ -32,12 +34,14 @@ export default class Reports extends Component {
     this.populatelist()
   }
 
-  deletedata() {
+  deletedata(event) {
+    event.preventDefault()
     console.log('deleting record')
     var a = this;
     axios.delete(this.props.checker.apiserver + '/records/' + this.listid.toString())
       .then(function(response) {
         a.listid = undefined
+        a.currentrecord = undefined
         a.populatelist()
       })
       .catch(function(error) {
@@ -48,25 +52,34 @@ export default class Reports extends Component {
 
 
 
-  newrecord() {
-    if (Recorddata.modalnew) {
+  modaldeletez() {
+    if (this.modaldelete && this.currentrecord != undefined) {
       return (
-        <Layer onClose={() => {
-                  Recorddata.modalnew = false
-                }} closer={true} align="center">
+        <Layer closer={true} align="center">
           <Box pad='medium'>
-            <Form>
+            <Form onSubmit={this.deletedata.bind(this)}>
               <Heading tag='h3'>
-                New Record
+                Delete Record?
               </Heading>
-              <FormField label='Name:'>
-                <TextInput />
-              </FormField>
-              <FormField label='interval(seconds):'>
-                <NumberInput defaultValue={1} />
-              </FormField>
+              <Label>
+                ID:
+                {this.listid}
+                {' '} Name:
+                {this.currentrecord}
+              </Label>
               <Footer pad={{ 'vertical': 'medium' }}>
-                <Button label='Create' type='submit' primary={true} onClick={console.log('sumbit')} />
+                <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
+                  <Button label='Confirm' type='submit' primary={true} />
+                </Box>
+                <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
+                  <Button label='Cancel' type='button' primary={true} onClick={() => {
+                                                                                 console.log('cancel')
+                                                                                 this.modaldelete = false
+                                                                                 this.listid = undefined
+                                                                                 this.currentrecord = undefined
+                                                                                 this.populatelist()
+                                                                               }} />
+                </Box>
               </Footer>
             </Form>
           </Box>
@@ -75,9 +88,11 @@ export default class Reports extends Component {
     }
   }
 
-  selectedItem(e) {
-    this.listid = e
+  selectedItem(id, namez) {
+    this.listid = id
+    this.currentrecord = namez
     console.log(this.listid)
+    console.log(this.currentrecord)
     this.populatetable()
   }
 
@@ -100,6 +115,7 @@ export default class Reports extends Component {
       .catch(function(error) {
         console.log(error);
       });
+    this.currentrecord = undefined
     this.visible = true
   }
 
@@ -135,7 +151,7 @@ export default class Reports extends Component {
 
 
     var ListItemz = this.listz.map(list => (
-      <ListItem key={list.id} onClick={this.selectedItem.bind(this, list.id)}>
+      <ListItem key={list.id} onClick={this.selectedItem.bind(this, list.id, list.name)}>
         {list.name}
       </ListItem>))
 
@@ -169,8 +185,11 @@ export default class Reports extends Component {
         <Split flex='right'>
           <Box colorIndex='neutral-4-a' direction='column' pad='small' full='vertical'>
             <Box direction='row'>
-              <Button icon={< TrashIcon />} accent={true} onClick={this.deletedata.bind(this)} />
+              <Button icon={< TrashIcon />} accent={true} onClick={() => {
+                                                                     this.modaldelete = true
+                                                                   }} />
               <Button icon={< RefreshIcon />} accent={true} onClick={this.populatelist.bind(this)} />
+              {this.modaldeletez()}
             </Box>
             <Box colorIndex='light-2'>
               <Animate visible={this.visible} enter={{ 'animation': 'fade', 'duration': 1000, 'delay': 0 }} keep={true}>
