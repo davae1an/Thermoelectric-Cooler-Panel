@@ -37,7 +37,7 @@ export default class Recordbtns extends Component {
 
   addrecord() {
     // event.preventDefault()
-
+    Recorddata.modalnew = false
     if (Recorddata.newrname != undefined && Recorddata.interval != undefined) {
       if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
         axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
@@ -84,7 +84,9 @@ export default class Recordbtns extends Component {
                                                                        }} />
               </FormField>
               <Footer pad={{ 'vertical': 'medium' }}>
-                <Button label='Create' type='submit' primary={true} />
+                <Button label='Create' type='submit' primary={true} onClick={() => {
+                                                                               Recorddata.modalnew = false
+                                                                             }} />
               </Footer>
             </Form>
           </Box>

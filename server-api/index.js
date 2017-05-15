@@ -221,7 +221,7 @@ app.post('/records/:name/:interval', function(req, res) {
         console.log(error)
       }
     })
-    db.run('UPDATE settingz SET value =' + 'true' + 'WHERE setname =(?)', 'RecordData', function(error) {
+    db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', ['true', 'RecordData'], function(error) {
       if (error) {
         console.log(error)
       }

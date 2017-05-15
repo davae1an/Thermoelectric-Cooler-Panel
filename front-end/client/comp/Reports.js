@@ -64,8 +64,9 @@ export default class Reports extends Component {
               </Heading>
               <Label>
                 ID:
+                {' '}
                 {this.listid}
-                {' '} Name:
+                {'     '} Name:
                 {this.currentrecord}
               </Label>
               <Footer pad={{ 'vertical': 'medium' }}>
