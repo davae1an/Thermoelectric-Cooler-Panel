@@ -230,10 +230,15 @@ app.get('/records/:id', function(req, res) {
 
 app.post('/records/:name/:interval', function(req, res) {
   db.serialize(function() {
+    var lastinsertid = undefined
     db.run('INSERT INTO pirecords (name) VALUES (?)', req.params.name, function(error) {
       if (error) {
         console.log(error)
       }
+    })
+
+    db.get('SELECT last_insert_rowid()', function(err, row) {
+      this.lastinsertid = row
     })
     db.run('UPDATE settingz SET value = (?) WHERE setname = (?)', [req.params.name, 'currentrecord'], function(error) {
       if (error) {
@@ -246,6 +251,12 @@ app.post('/records/:name/:interval', function(req, res) {
       }
     })
     db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', ['true', 'RecordData'], function(error) {
+      if (error) {
+        console.log(error)
+      }
+    })
+
+    db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', [this.lastinsertid, 'recordid'], function(error) {
       if (error) {
         console.log(error)
       }
@@ -281,6 +292,35 @@ app.put('/recordcmd/:cmd', function(req, res) {
   if (req.params.cmd == 'stop') {
 
     client.broadcast.emit('record', 'False')
+
+    db.serialize(function() {
+
+      db.run('UPDATE settingz SET value = (?) WHERE setname = (?)', ['none', 'currentrecord'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+      db.run('UPDATE settingz SET value = (?) WHERE setname = (?)', [1, 'interval'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+      db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', ['False', 'RecordData'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+
+      db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', ['0', 'recordid'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+    })
+
+
+
+
     res.send('stopped')
   } else {
     res.send('failed')

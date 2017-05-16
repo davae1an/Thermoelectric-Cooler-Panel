@@ -95,18 +95,18 @@ class Namespace(BaseNamespace):
                 Status.recordId = value
 
             if key == 'interval':
-                Status.recordInterval = value
+                Status.recordInterval = int(value)
 
             if key == 'currentrecord':
                 if value != 'none':
                     RecordNow = True
 
+            print('RecordInfo: ' + key + 'Value:' + value)
+
         if RecordNow:
             Status.RecordData = True
         else:
             Status.RecordData = False
-
-        print('RecordInfo: ' + key + 'Value:' + value)
 
     def on_gettemptarget(self, *args):
         Status.LoadConfig()
