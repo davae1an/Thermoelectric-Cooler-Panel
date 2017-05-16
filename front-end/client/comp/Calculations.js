@@ -1,13 +1,5 @@
-import React, {Component} from 'react';
-import {
-  Box,
-  Label,
-  Tiles,
-  Tile,
-  Header,
-  Heading,
-  Paragraph
-} from 'grommet';
+import React, { Component } from 'react';
+import { Box, Label, Tiles, Tile, Header, Heading, Paragraph } from 'grommet';
 
 export default class Calculations extends Component {
   render() {
@@ -16,12 +8,9 @@ export default class Calculations extends Component {
         <Box colorIndex='neutral-1-a'>
           <Label align='center' size='medium'>Sample Calculations</Label>
         </Box>
-
         <Tiles flush={false}>
           <Tile separator='top' align='start'>
-            <Header size='small' pad={{
-              "horizontal": "small"
-            }}>
+            <Header size='small' pad={{ "horizontal": "small" }}>
               <Heading tag='h4' strong={true} margin='none'>
                 Tile 1
               </Heading>
@@ -33,9 +22,7 @@ export default class Calculations extends Component {
             </Box>
           </Tile>
           <Tile separator='top' align='start'>
-            <Header size='small' pad={{
-              "horizontal": "small"
-            }}>
+            <Header size='small' pad={{ "horizontal": "small" }}>
               <Heading tag='h4' strong={true} margin='none'>
                 Tile 2
               </Heading>
@@ -47,9 +34,7 @@ export default class Calculations extends Component {
             </Box>
           </Tile>
           <Tile separator='top' align='start'>
-            <Header size='small' pad={{
-              "horizontal": "small"
-            }}>
+            <Header size='small' pad={{ "horizontal": "small" }}>
               <Heading tag='h4' strong={true} margin='none'>
                 Tile 3
               </Heading>
@@ -61,9 +46,7 @@ export default class Calculations extends Component {
             </Box>
           </Tile>
           <Tile separator='top' align='start'>
-            <Header size='small' pad={{
-              "horizontal": "small"
-            }}>
+            <Header size='small' pad={{ "horizontal": "small" }}>
               <Heading tag='h4' strong={true} margin='none'>
                 Tile 4
               </Heading>
@@ -76,6 +59,6 @@ export default class Calculations extends Component {
           </Tile>
         </Tiles>
       </div>
-    );
+      );
   }
 }

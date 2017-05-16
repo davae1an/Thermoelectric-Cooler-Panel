@@ -5,13 +5,15 @@ import os.path
 
 
 class Status(object):
-    RecordData = True
+    RecordData = False
     isConnected = False
     TempTarget = 25
     radiatorFan = 'OFF'
     peltierCheck = 'OFF'
     pumpCheck = 'OFF'
-    insideFanCheck = 'OFF'  # <<config this
+    insideFanCheck = 'OFF'  # <<config
+    recordInterval = 1
+    recordId = 0
 
     def SortData(data, char1, char2):
         Sorted = data[data.find(char1) + 1: data.find(char2)]
@@ -54,7 +56,7 @@ class Namespace(BaseNamespace):
         self.emit('join', 'raspberrypi zero joined at ' +
                   str(datetime.datetime.now()))
         self.emit('targettemp', str(Status.TempTarget))
-        self.emit('recordinfo', 'check')
+        self.emit('recordcheck', 'check')
 
     def on_reconnect(self):
         print('raspberry pi reconnected')
@@ -70,23 +72,47 @@ class Namespace(BaseNamespace):
         self.emit('join', 'raspberry pi in record mode')
         data = Status.SortData(str(args), '{', '}')
         if data == 'True':
-            Status.RecordData = True
-            print('Recording Data Now')
+            # Status.RecordData = True
+            print('Fetching New Record Data')
+            self.emit('recordcheck', 'check')
+
         else:
             Status.RecordData = False
+            Status.recordId = '0'
+            Status.recordInterval = 4
             print('Stop Recording Data')
+
+    def on_recordinfo(self, *args):
+        print('got recordinfo')
+        Status.LoadConfig()
+        data = Status.SortData(str(args), '|', '|')
+        jsonObject = json.loads(data)
+        RecordNow = False
+
+        for key in jsonObject:
+            value = jsonObject[key]
+            if key == 'recordid':
+                Status.recordId = value
+
+            if key == 'interval':
+                Status.recordInterval = value
+
+            if key == 'currentrecord':
+                if value != 'none':
+                    RecordNow = True
+
+        if RecordNow:
+            Status.RecordData = True
+        else:
+            Status.RecordData = False
+
+        print('RecordInfo: ' + key + 'Value:' + value)
 
     def on_gettemptarget(self, *args):
         Status.LoadConfig()
         data = Status.SortData(str(args), '{', '}')
         if data == 'givemetemp':
             self.emit('targettemp', str(Status.TempTarget))
-
-    def on_checkrecord(self):
-        if Status.RecordData:
-            print('checkrecord sending true')
-        else:
-            print('checkrecord sending false')
 
     def on_changetemp(self, *args):
         data = Status.SortData(str(args), '{', '}')

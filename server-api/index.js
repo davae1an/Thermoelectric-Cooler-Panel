@@ -15,7 +15,7 @@ db.serialize(function() {
   db.run('CREATE TABLE IF NOT EXISTS pirecords (' +
     'rec_id INTEGER PRIMARY KEY, name TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)')
   db.run('CREATE TABLE IF NOT EXISTS pidata (' +
-    'outside TEXT, inside TEXT, pump TEXT, date TEXT, rec_id INTEGER,' +
+    'outside TEXT, inside TEXT, pump TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP, rec_id INTEGER,' +
     'FOREIGN KEY(rec_id) REFERENCES pirecords(rec_id))')
   db.run('CREATE TABLE IF NOT EXISTS settingz (setname TEXT, value TEXT)')
 
@@ -99,6 +99,25 @@ db.serialize(function() {
 
   })
 
+  db.get('SELECT setname FROM settingz WHERE setname=(?)', 'recordid', function(err, row) {
+
+    if (row == undefined) {
+      console.log('recordid not found adding to table')
+      db.serialize(function() {
+        db.run('INSERT INTO settingz (setname, value) VALUES (?,?)', [
+          'recordid', '0'
+        ], function(error) {
+          if (error) {
+            console.log('Cant insert data Error: ' + error)
+          }
+        })
+      })
+    } else {
+      console.log('recordid exsists already')
+    }
+
+  })
+
 })
 
 //Socket.io
@@ -141,7 +160,7 @@ io.on('connection', function(client) {
         console.log('Getting record data from database')
         db.all('SELECT setname, value FROM settingz', function(err, rows) {
           console.log(rows)
-          client.broadcast.emit('recordinfo', rows)
+          client.broadcast.emit('recordinfo', '|' + JSON.stringify(rows) + '|')
 
         })
       })
@@ -152,11 +171,16 @@ io.on('connection', function(client) {
 
   client.on('tempadd', function(data) {
     var jsondata = JSON.parse(data);
-    var currentdate = jsondata.date;
 
-    db.serialize(function() {})
-    // temp : jsondata.temp,
-    // time : jsondata.time
+    db.serialize(function() {
+      db.run('INSERT INTO pidata (outside, inside, pump, rec_id) VALUES ((?),(?),(?),(?))', [jsondata.tempinside, jsondata.tempoutside, jsondata.temphousing, jsondata.recordId], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+
+    })
+
 
   });
 
@@ -228,6 +252,8 @@ app.post('/records/:name/:interval', function(req, res) {
     })
   })
 
+  client.broadcast.emit('record', 'True')
+
 })
 
 
@@ -249,6 +275,19 @@ app.delete('/records/:id', function(req, res) {
   })
   res.send('deleted')
 });
+
+
+app.put('/recordcmd/:cmd', function(req, res) {
+  if (req.params.cmd == 'stop') {
+
+    client.broadcast.emit('record', 'False')
+    res.send('stopped')
+  } else {
+    res.send('failed')
+  }
+
+});
+
 
 
 app.get('/pidata/:id', function(req, res) {

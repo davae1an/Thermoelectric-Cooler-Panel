@@ -107,16 +107,6 @@ def getTemps():
                     'insideFan': Status.insideFanCheck
                 }, sort_keys=False, indent=4))
 
-            if Status.RecordData is True:
-                print('Sendind data to express js')
-                socketIO.emit('tempadd', json.dumps(
-                    {
-                        'tempinside': str(inside_temp_c),
-                        'temphousing': str(housing_temp_c),
-                        'tempoutside': str(outside_temp_c),
-                        'radiatorFan': Status.radiatorFan
-                    }, sort_keys=False, indent=4))
-
         # lcd.clear()
         # lcd.message('Current:' + str(inside_temp_c)[:4] + ' ' +
         #             chr(223) + 'C' + '\n' + ' Target:' +
@@ -166,12 +156,32 @@ def radiatorsys():
         time.sleep(1)
 
 
+def recorder():
+    while True:
+
+        if Status.RecordData is True:
+            inside_temp_c, inside_temp_f = Tempchecker.read_inside_temp()
+            housing_temp_c, housing_temp_f = Tempchecker.read_housing_temp()
+            outside_temp_c, outside_temp_f = Tempchecker.read_outside_temp()
+            print('Sendind data to express js')
+            socketIO.emit('tempadd', json.dumps(
+                {
+                    'recordId': str(Status.recordId),
+                    'tempinside': str(inside_temp_c),
+                    'temphousing': str(housing_temp_c),
+                    'tempoutside': str(outside_temp_c)
+                }, sort_keys=False, indent=4))
+
+        time.sleep(Status.recordInterval)
+
+
 def connector():
     socketIO.wait()
 
 
 Status.LoadConfig()
-
+rec = Thread(target=recorder)
+rec.start()
 b = Thread(target=buttonwait)
 b.start()
 g = Thread(target=getTemps)

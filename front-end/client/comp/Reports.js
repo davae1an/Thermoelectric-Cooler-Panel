@@ -86,7 +86,7 @@ export default class Reports extends Component {
             </Form>
           </Box>
         </Layer>
-      );
+        );
     }
   }
 

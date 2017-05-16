@@ -118,7 +118,7 @@ var data = {
   ]
 };
 
-defaults.global.animationSteps = 20;
+defaults.global.animationSteps = 15;
 
 
 

@@ -33,6 +33,19 @@ export default class Recordbtns extends Component {
 
   stoprecord() {
     console.log('stoping record')
+    axios.put(this.props.checker.apiserver + '/recordcmd/' + 'stop')
+      .then(function(response) {
+
+        if (response = 'stopped') {
+          Recorddata.isRecording = false
+          console.log('it ' + response)
+        }
+
+      })
+      .catch(function(error) {
+        console.log(error);
+      // Recorddata.modalnew = false
+      });
   }
 
   addrecord() {
@@ -42,7 +55,6 @@ export default class Recordbtns extends Component {
       if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
         axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
           .then(function(response) {
-
             Recorddata.newrname = undefined
             Recorddata.interval = undefined
             Recorddata.modalnew = false
@@ -91,7 +103,7 @@ export default class Recordbtns extends Component {
             </Form>
           </Box>
         </Layer>
-      );
+        );
     }
   }
 
@@ -150,7 +162,7 @@ export default class Recordbtns extends Component {
                   {' '}
                 </Heading>
                 <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
-                  <Button label='Stop' icon={<StopIcon/>} />
+                  <Button label='Stop' icon={<StopIcon/>} onClick={this.stoprecord.bind(this)} />
                 </Box>
                 <Heading tag='h4' margin='none'>
                   Name:
@@ -188,7 +200,7 @@ export default class Recordbtns extends Component {
             <Button label='check' icon={<TransactionIcon />} onClick={this.checkforpi.bind(this)} />
           </Box>
         </div>
-      );
+        );
 
     }
 
