@@ -10,7 +10,7 @@ import axios from 'axios';
 // I never understood forms so hacked through it with states =p
 class Recordinfo {
   @observable isRecording = false
-  @observable RecordName = ''
+  RecordName = ''
   @observable modalnew = undefined
   newrname = undefined
   interval = undefined
@@ -76,34 +76,34 @@ export default class Recordbtns extends Component {
   newrecord() {
 
     if (Recorddata.modalnew) {
-      return (
-        <Layer onClose={() => {
+      if (Recorddata.isRecording == false) {
+        return (
+          <Layer onClose={() => {
                   Recorddata.modalnew = false
                 }} closer={true} align="center">
-          <Box pad='medium'>
-            <Form onSubmit={this.addrecord.bind(this)}>
-              <Heading tag='h3'>
-                New Record
-              </Heading>
-              <FormField label='Name:'>
-                <TextInput id='namez' onDOMChange={(event) => {
-                                                     Recorddata.newrname = event.target.value
-                                                   }} />
-              </FormField>
-              <FormField label='interval(seconds):' htmlFor='intervalz'>
-                <NumberInput id='intervalz' defaultValue={0} onChange={(event) => {
-                                                                         Recorddata.interval = event.target.value
-                                                                       }} />
-              </FormField>
-              <Footer pad={{ 'vertical': 'medium' }}>
-                <Button label='Create' type='submit' primary={true} onClick={() => {
-                                                                               Recorddata.modalnew = false
-                                                                             }} />
-              </Footer>
-            </Form>
-          </Box>
-        </Layer>
-        );
+            <Box pad='medium'>
+              <Form onSubmit={this.addrecord.bind(this)}>
+                <Heading tag='h3'>
+                  New Record
+                </Heading>
+                <FormField label='Name:'>
+                  <TextInput id='namez' onDOMChange={(event) => {
+                                                       Recorddata.newrname = event.target.value
+                                                     }} />
+                </FormField>
+                <FormField label='interval(seconds):' htmlFor='intervalz'>
+                  <NumberInput id='intervalz' defaultValue={0} onChange={(event) => {
+                                                                           Recorddata.interval = event.target.value
+                                                                         }} />
+                </FormField>
+                <Footer pad={{ 'vertical': 'medium' }}>
+                  <Button label='Create' type='submit' primary={true} />
+                </Footer>
+              </Form>
+            </Box>
+          </Layer>
+          );
+      }
     }
   }
 
@@ -134,11 +134,12 @@ export default class Recordbtns extends Component {
 
             if (data.setname == 'currentrecord') {
               if (data.value != 'none') {
-                Recorddata.isRecording = true
                 Recorddata.RecordName = data.value
+                Recorddata.isRecording = true
                 console.log(data.value)
               } else {
                 Recorddata.isRecording = false
+                Recorddata.RecordName = ''
               }
 
             }
