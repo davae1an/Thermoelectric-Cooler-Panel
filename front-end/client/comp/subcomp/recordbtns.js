@@ -11,23 +11,24 @@ import axios from 'axios';
 class Recordinfo {
   @observable isRecording = false
   RecordName = ''
-  @observable modalnew = undefined
-  newrname = undefined
-  interval = undefined
+  @observable modalnew = false
+  newrname = ''
+  interval = ''
 }
 
 var Recorddata = new Recordinfo();
-
 
 
 @observer
 export default class Recordbtns extends Component {
 
 
-
   constructor(props) {
     super(props);
+  }
 
+  componentDidMount() {
+    this.checkforpi()
   }
 
 
@@ -50,13 +51,12 @@ export default class Recordbtns extends Component {
 
   addrecord() {
     // event.preventDefault()
-    Recorddata.modalnew = false
-    if (Recorddata.newrname != undefined && Recorddata.interval != undefined) {
+    if (Recorddata.newrname != '' && Recorddata.interval != '') {
       if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
         axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
           .then(function(response) {
-            Recorddata.newrname = undefined
-            Recorddata.interval = undefined
+            Recorddata.newrname = ''
+            Recorddata.interval = ''
             Recorddata.modalnew = false
             // a.props.pop()
 
@@ -64,12 +64,16 @@ export default class Recordbtns extends Component {
           .catch(function(error) {
             console.log(error);
             Recorddata.modalnew = false
+            Recorddata.newrname = ''
+            Recorddata.interval = ''
           });
 
       }
     } else {
       console.log('You did not submit form properly')
       Recorddata.modalnew = false
+      Recorddata.newrname = ''
+      Recorddata.interval = ''
     }
   }
 
@@ -80,6 +84,9 @@ export default class Recordbtns extends Component {
         return (
           <Layer onClose={() => {
                   Recorddata.modalnew = false
+                  Recorddata.newrname = ''
+                  Recorddata.interval = ''
+                
                 }} closer={true} align="center">
             <Box pad='medium'>
               <Form onSubmit={this.addrecord.bind(this)}>
@@ -91,7 +98,7 @@ export default class Recordbtns extends Component {
                                                        Recorddata.newrname = event.target.value
                                                      }} />
                 </FormField>
-                <FormField label='interval(seconds):' htmlFor='intervalz'>
+                <FormField label='interval(seconds):'>
                   <NumberInput id='intervalz' defaultValue={0} onChange={(event) => {
                                                                            Recorddata.interval = event.target.value
                                                                          }} />
@@ -114,14 +121,12 @@ export default class Recordbtns extends Component {
     } else {
       console.log('Cannot ping not connected to server')
     }
-
   }
 
 
   render() {
     var isPionline = this.props.checker.PiOnline
     var isConnected = this.props.checker.isConnected
-
 
     if (isPionline == true && isConnected == true) {
       console.log('checking isRocrding status via rest api')
@@ -130,7 +135,6 @@ export default class Recordbtns extends Component {
         .then(function(response) {
 
           response.data.map(function(data) {
-
 
             if (data.setname == 'currentrecord') {
               if (data.value != 'none') {
@@ -186,7 +190,6 @@ export default class Recordbtns extends Component {
             </Box>
             {this.newrecord()}
           </div>
-
 
         )
 

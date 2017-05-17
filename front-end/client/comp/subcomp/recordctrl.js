@@ -12,23 +12,6 @@ export default class Recordctrl extends Component {
 
   }
 
-  componentDidMount() {
-    this.checkforpi()
-  }
-
-
-  checkforpi() {
-
-    if (this.props.checker.isConnected == true) {
-      console.log('sending ping to pi')
-      this.props.socketz.checkpi()
-    } else {
-      console.log('Cannot ping not connected to server')
-    }
-
-  }
-
-
   checkrecord() {
     var isPionline = this.props.checker.PiOnline
     var isConnected = this.props.checker.isConnected
@@ -66,6 +49,6 @@ export default class Recordctrl extends Component {
       <div>
         {this.checkrecord()}
       </div>
-    );
+      );
   }
 }
