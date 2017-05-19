@@ -4,6 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var sqlite3 = require('sqlite3').verbose()
+var squel = require("squel");
 
 var db = new sqlite3.Database('../pyclient/data.db3');
 
@@ -267,8 +268,9 @@ app.post('/records/:name/:interval', function(req, res) {
 
 
   })
+  res.send('added')
 
-  // io.socket.client.broadcast.emit('record', 'True')
+  io.emit('record', '{True}')
 
 })
 
@@ -276,27 +278,43 @@ app.post('/records/:name/:interval', function(req, res) {
 
 app.delete('/records/:id', function(req, res) {
   db.serialize(function() {
-    db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id, function(error) {
-      if (error) {
-        console.log(error)
-      }
-    })
-    db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id, function(error) {
-      if (error) {
 
-        console.log(error)
+
+    db.get('SELECT value FROM settingz WHERE setname=(?)', 'recordid', function(err, row) {
+      console.log('The row to delete: ' + row)
+      if (row.value == req.params.id) {
+        console.log('record is currently being recorded cannot delete')
+        res.send('stopfirst')
+      } else {
+        res.send('deleted')
+        db.serialize(function() {
+
+          db.run('DELETE FROM pidata WHERE rec_id=(?)', req.params.id, function(error) {
+            if (error) {
+              console.log(error)
+            }
+          })
+          db.run('DELETE FROM pirecords WHERE rec_id=(?)', req.params.id, function(error) {
+            if (error) {
+
+              console.log(error)
+            }
+          })
+
+        })
       }
+
     })
+
 
   })
-  res.send('deleted')
 });
 
 
 app.put('/recordcmd/:cmd', function(req, res) {
   if (req.params.cmd == 'stop') {
 
-    // io.socket.client.broadcast.emit('record', 'False')
+    io.emit('record', '{False}')
 
     db.serialize(function() {
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { observable, autorun } from 'mobx';
+import { observable } from 'mobx';
 import { Header, Box, Title, Button, Anchor, Menu, Label, Columns, Heading, Headline, Layer, Form, FormField, TextInput, NumberInput, Footer } from 'grommet';
 import TransactionIcon from 'grommet/components/icons/base/Transaction';
 import { observer, computed } from 'mobx-react';
@@ -7,24 +7,23 @@ import NewIcon from 'grommet/components/icons/base/New';
 import StopIcon from 'grommet/components/icons/base/Stop';
 import axios from 'axios';
 
-// I never understood forms so hacked through it with states =p
-class Recordinfo {
-  @observable isRecording = false
-  RecordName = ''
-  @observable modalnew = false
-  newrname = ''
-  interval = ''
-}
-
-var Recorddata = new Recordinfo();
-
 
 @observer
 export default class Recordbtns extends Component {
 
+  @observable isRecording = false
+  @observable RecordName = ''
+  @observable modalnew = false
+  newrname = ''
+  interval = 0
+  Tinputrecord
+  Ninputrecord
 
   constructor(props) {
     super(props);
+    this.addrecord = this.addrecord.bind(this)
+    this.handleChange = this.handleChange.bind(this)
+    this.handlenuminput = this.handlenuminput.bind(this)
   }
 
   componentDidMount() {
@@ -34,83 +33,114 @@ export default class Recordbtns extends Component {
 
   stoprecord() {
     console.log('stoping record')
+    var a = this
     axios.put(this.props.checker.apiserver + '/recordcmd/' + 'stop')
       .then(function(response) {
 
-        if (response = 'stopped') {
-          Recorddata.isRecording = false
-          console.log('it ' + response)
+        if (response.data == 'stopped') {
+          a.isRecording = false
+          a.newrname = ''
+          a.interval = 0
+          console.log('it ' + response.data)
+          console.log('isRecording: ' + a.isRecording)
         }
 
       })
       .catch(function(error) {
-        console.log(error);
-      // Recorddata.modalnew = false
+        if (error) {
+          console.log(error);
+          a.newrname = ''
+          a.interval = 0
+        }
       });
   }
 
-  addrecord() {
-    // event.preventDefault()
-    if (Recorddata.newrname != '' && Recorddata.interval != '') {
-      if (Recorddata.newrname != '' && Recorddata.interval >= 1) {
-        axios.post(this.props.checker.apiserver + '/records/' + Recorddata.newrname + '/' + Recorddata.interval.toString())
-          .then(function(response) {
-            Recorddata.newrname = ''
-            Recorddata.interval = ''
-            Recorddata.modalnew = false
-            // a.props.pop()
+  addrecord(event) {
+    console.log('adding Record')
+    event.preventDefault()
+    this.modalnew = false
+    var b = this;
+    if (this.newrname != '' && this.interval >= 0) {
+      axios.post(this.props.checker.apiserver + '/records/' + this.newrname + '/' + this.interval.toString())
+        .then(function(response) {
 
-          })
-          .catch(function(error) {
-            console.log(error);
-            Recorddata.modalnew = false
-            Recorddata.newrname = ''
-            Recorddata.interval = ''
-          });
+          if (response.data == 'added') {
+            console.log('Request: record added')
+            b.newrname = ''
+            b.interval = 0
+            b.isRecording = true
+          }
 
-      }
+
+        })
+        .catch(function(error) {
+          if (error) {
+            a.newrname = ''
+            a.interval = ''
+            a.isRecording = false
+
+          }
+
+        });
+
+
     } else {
       console.log('You did not submit form properly')
-      Recorddata.modalnew = false
-      Recorddata.newrname = ''
-      Recorddata.interval = ''
+      a.modalnew = false
+      a.newrname = ''
+      a.interval = 0
+      a.isRecording = false
     }
+  }
+
+
+  handleChange(e) {
+    this.newrname = e.target.value
+
+  }
+
+  handlenuminput(e) {
+    this.interval = e.target.value
   }
 
   newrecord() {
 
-    if (Recorddata.modalnew) {
-      if (Recorddata.isRecording == false) {
-        return (
-          <Layer onClose={() => {
-                  Recorddata.modalnew = false
-                  Recorddata.newrname = ''
-                  Recorddata.interval = ''
-                
-                }} closer={true} align="center">
-            <Box pad='medium'>
-              <Form onSubmit={this.addrecord.bind(this)}>
-                <Heading tag='h3'>
-                  New Record
-                </Heading>
-                <FormField label='Name:'>
-                  <TextInput id='namez' onDOMChange={(event) => {
-                                                       Recorddata.newrname = event.target.value
-                                                     }} />
-                </FormField>
-                <FormField label='interval(seconds):'>
-                  <NumberInput id='intervalz' defaultValue={0} onChange={(event) => {
-                                                                           Recorddata.interval = event.target.value
-                                                                         }} />
-                </FormField>
-                <Footer pad={{ 'vertical': 'medium' }}>
+    if (this.modalnew) {
+      return (
+        <Layer closer={true} align="center">
+          <Box pad='medium'>
+            <Form onSubmit={this.addrecord}>
+              <Heading tag='h3'>
+                New Record
+              </Heading>
+              <FormField label='Name:'>
+                <TextInput onDOMChange={this.handleChange} />
+              </FormField>
+              <FormField label='Interval (seconds):'>
+                <NumberInput defaultValue={0} onChange={this.handlenuminput} />
+              </FormField>
+              <Footer pad={{ 'vertical': 'medium' }}>
+                <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
                   <Button label='Create' type='submit' primary={true} />
-                </Footer>
-              </Form>
-            </Box>
-          </Layer>
-          );
-      }
+                </Box>
+                <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
+                  <Button label='Cancel' type='button' primary={true} onClick={() => {
+                                                                                 console.log('cancel')
+                                                                                 this.modalnew = false
+                                                                                 this.newrname = ''
+                                                                                 this.interval = 0
+                                                                               
+                                                                               }} />
+                </Box>
+              </Footer>
+            </Form>
+          </Box>
+        </Layer>
+
+
+
+      )
+
     }
   }
 
@@ -123,10 +153,10 @@ export default class Recordbtns extends Component {
     }
   }
 
-
-  render() {
+  getrecord() {
     var isPionline = this.props.checker.PiOnline
     var isConnected = this.props.checker.isConnected
+    var a = this
 
     if (isPionline == true && isConnected == true) {
       console.log('checking isRocrding status via rest api')
@@ -138,12 +168,13 @@ export default class Recordbtns extends Component {
 
             if (data.setname == 'currentrecord') {
               if (data.value != 'none') {
-                Recorddata.RecordName = data.value
-                Recorddata.isRecording = true
+                a.RecordName = data.value
+                a.isRecording = true
                 console.log(data.value)
+                console.log('isRecording: ' + a.isRecording)
               } else {
-                Recorddata.isRecording = false
-                Recorddata.RecordName = ''
+                a.isRecording = false
+                a.RecordName = ''
               }
 
             }
@@ -157,7 +188,7 @@ export default class Recordbtns extends Component {
           console.log(error);
         });
 
-      if (Recorddata.isRecording == true) {
+      if (this.isRecording == true) {
         return (
           <div>
             <Box pad={{ 'horizontal': 'small' }} margin='none' direction='row' align='center'>
@@ -172,7 +203,7 @@ export default class Recordbtns extends Component {
                 <Heading tag='h4' margin='none'>
                   Name:
                   {' '}
-                  {Recorddata.RecordName}
+                  {this.RecordName}
                 </Heading>
               </Box>
             </Box>
@@ -185,10 +216,9 @@ export default class Recordbtns extends Component {
           <div>
             <Box pad={{ 'horizontal': 'small' }} margin='none'>
               <Button label='New Record' icon={<NewIcon/>} onClick={() => {
-                                                                      Recorddata.modalnew = true
+                                                                      this.modalnew = true
                                                                     }} />
             </Box>
-            {this.newrecord()}
           </div>
 
         )
@@ -208,9 +238,16 @@ export default class Recordbtns extends Component {
 
     }
 
+  }
 
 
+  render() {
+    return (
+      <div>
+        {this.getrecord()}
+        {this.newrecord()}
+      </div>
 
-
+    )
   }
 }

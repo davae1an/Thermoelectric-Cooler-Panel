@@ -40,13 +40,23 @@ export default class Reports extends Component {
     var a = this;
     axios.delete(this.props.checker.apiserver + '/records/' + this.listid.toString())
       .then(function(response) {
-        a.listid = undefined
-        a.currentrecord = undefined
-        a.modaldelete = false
-        a.populatelist()
+
+        if (response.data == 'stopfirst') {
+          alert('Please Stop Recording First Before Delete')
+          a.populatelist()
+        } else {
+          a.populatelist()
+          a.listid = undefined
+          a.currentrecord = undefined
+          a.modaldelete = false
+        }
+
       })
       .catch(function(error) {
-        console.log(error);
+        if (error) {
+          console.log(error);
+        }
+
       });
 
   }
