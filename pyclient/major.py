@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from gpiozero import Button, PWMOutputDevice, LED
-# import Adafruit_CharLCD as LCD PWMOutputDevice,
+import Adafruit_CharLCD as LCD
 from classes.tempchecker import Tempchecker
 from classes.connect import Namespace
 from classes.connect import Status
@@ -16,22 +16,21 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Raspberry Pi pin configuration:
 # Note this might need to be changed to 21 for older revision Pi's.
-# lcd_rs = 21
-# lcd_en = 20
-# lcd_d4 = 16
-# lcd_d5 = 12
-# lcd_d6 = 25
-# lcd_d7 = 24
+lcd_rs = 21
+lcd_en = 20
+lcd_d4 = 16
+lcd_d5 = 12
+lcd_d6 = 25
+lcd_d7 = 24
 
 
 # Define LCD column and row size for 16x2 LCD.lcd_backlight = 4
-# lcd_columns = 16
-# lcd_rows = 3
+lcd_columns = 16
+lcd_rows = 3
 
 # Initialize the LCD using the pins above.
-# lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
-#                            lcd_columns, lcd_rows)
-# lcd_backlight)
+lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
+                           lcd_columns, lcd_rows)
 
 
 # Peltier Pinout signal on pin 5
@@ -52,10 +51,19 @@ def turnup():
     TempTarget = TempTarget + 0.5
     Status.WriteConfig('TempTarget', str(TempTarget))
     print('Turn up to: ' + str(TempTarget))
-    # lcd.clear(
-    # lcd.message('Current:' + str(Tempinsidez)[:4] + ' ' +
-    #             chr(223) + 'C' + '\n' + ' Target:' +
-    #             str(TempTarget) + ' ' + chr(223) + 'C')
+    lcd.clear(
+        lcd.message(
+            'Current:' +
+            str(Tempinsidez)[:4] +
+            ' ' +
+            chr(223) +
+            'C' +
+            '\n' +
+            ' Target:' +
+            str(TempTarget) +
+            ' ' +
+            chr(223) +
+            'C'))
 
     if Status.isConnected is True:
         socketIO.emit('targettemp', str(TempTarget))
@@ -67,10 +75,10 @@ def turndown():
     Status.WriteConfig('TempTarget', str(TempTarget))
     print('Turn down to: ' + str(TempTarget))
 
-    # lcd.clear()
-    # lcd.message('Current:' + str(Tempinsidez)[:4] + ' ' +
-    #             chr(223) + 'C' + '\n' + ' Target:' +
-    #             str(TempTarget) + ' ' + chr(223) + 'C')
+    lcd.clear()
+    lcd.message('Current:' + str(Tempinsidez)[:4] + ' ' +
+                chr(223) + 'C' + '\n' + ' Target:' +
+                str(TempTarget) + ' ' + chr(223) + 'C')
 
     if Status.isConnected is True:
         socketIO.emit('targettemp', str(TempTarget))
@@ -107,10 +115,10 @@ def getTemps():
                     'insideFan': Status.insideFanCheck
                 }, sort_keys=False, indent=4))
 
-        # lcd.clear()
-        # lcd.message('Current:' + str(inside_temp_c)[:4] + ' ' +
-        #             chr(223) + 'C' + '\n' + ' Target:' +
-        #            str(TempTarget) + ' ' + chr(223) + 'C')
+        lcd.clear()
+        lcd.message('Current:' + str(inside_temp_c)[:4] + ' ' +
+                    chr(223) + 'C' + '\n' + ' Target:' +
+                    str(TempTarget) + ' ' + chr(223) + 'C')
 
         if inside_temp_c > TempTarget:
             if Peltier.is_active is False:
