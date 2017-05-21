@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import store from './Livedata';
 
-var socket = io('http://localhost:3000');
+var socket = io('http://raspberrypi.local:3000');
 
 class Socketz {
 
@@ -14,7 +14,7 @@ class Socketz {
 
 
   changetemp() {
-    socket.emit('changetemp', parseFloat(store.targetTemp))
+    socket.emit('changetemp', '{' + parseFloat(store.targetTemp) + '}')
   }
 
   contoserver() {

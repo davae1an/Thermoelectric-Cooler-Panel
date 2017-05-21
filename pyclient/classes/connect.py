@@ -7,7 +7,7 @@ import os.path
 class Status(object):
     RecordData = False
     isConnected = False
-    TempTarget = 25
+    TempTarget = 25.0
     radiatorFan = 'OFF'
     peltierCheck = 'OFF'
     pumpCheck = 'OFF'
@@ -20,7 +20,6 @@ class Status(object):
         return Sorted
 
     def LoadConfig():
-        global TempTarget
         PATH = './config.json'
         if os.path.isfile(PATH):
             print('File exists and is readable')
@@ -117,6 +116,7 @@ class Namespace(BaseNamespace):
     def on_changetemp(self, *args):
         data = Status.SortData(str(args), '{', '}')
         Status.TempTarget = float(data)
+        Status.WriteConfig('TempTarget', str(Status.TempTarget))
 
     def on_picheck(self, *args):
         data = Status.SortData(str(args), '{', '}')

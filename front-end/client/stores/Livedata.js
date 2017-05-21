@@ -19,7 +19,7 @@ class Livedata {
   @observable insideFan = 'OFF'
 
   //Api Stuff below
-  apiserver = 'http://localhost:3000'
+  apiserver = 'http://raspberrypi.local:3000'
 
 
 }
