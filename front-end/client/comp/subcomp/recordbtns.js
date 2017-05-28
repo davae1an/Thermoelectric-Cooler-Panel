@@ -60,7 +60,7 @@ export default class Recordbtns extends Component {
     event.preventDefault()
     this.modalnew = false
     var b = this;
-    if (this.newrname != '' && this.interval >= 0) {
+    if (this.newrname != '' && this.interval >= 1) {
       axios.post(this.props.checker.apiserver + '/records/' + this.newrname + '/' + this.interval.toString())
         .then(function(response) {
 
@@ -85,7 +85,7 @@ export default class Recordbtns extends Component {
 
 
     } else {
-      console.log('You did not submit form properly')
+      alert('You did not submit form properly (interval > 0)')
       a.modalnew = false
       a.newrname = ''
       a.interval = 0

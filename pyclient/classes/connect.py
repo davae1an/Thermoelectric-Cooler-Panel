@@ -2,9 +2,12 @@ from socketIO_client import BaseNamespace
 import datetime
 import json
 import os.path
+import requests
+import time
 
 
 class Status(object):
+    url = 'http://localhost:3000'
     RecordData = False
     isConnected = False
     TempTarget = 25.0
@@ -14,6 +17,7 @@ class Status(object):
     insideFanCheck = 'OFF'  # <<config
     recordInterval = 1
     recordId = 0
+    mode = 'high'
 
     def SortData(data, char1, char2):
         Sorted = data[data.find(char1) + 1: data.find(char2)]
@@ -46,18 +50,82 @@ class Status(object):
         with open('config.json', 'w') as f:
             json.dump(config, f)
 
+    # def Checkrecords():
+    #     print('got recordinfo')
+    #     r = requests.get(Status.url + '/settingz')
+
+    #     print('Record info:' + r.text)
+    #     jsonObject = json.loads(r.text)
+    #     RecordNow = False
+    #     for key in jsonObject:
+    #         field = key['setname']
+    #         value = key['value']
+    #         if field == 'recordid':
+    #             Status.recordId = value
+
+    #         if field == 'interval':
+    #             Status.recordInterval = int(value)
+
+    #         if field == 'mode':
+    #             Status.mode = value
+    #             print('mode:' + value)
+
+    #         if field == 'currentrecord':
+    #             if value != 'none':
+    #                 RecordNow = True
+
+    #     if RecordNow:
+    #         Status.RecordData = True
+    #         print('record status set to true')
+    #     else:
+    #         Status.RecordData = False
+    #         print('record status set to false')
+
 
 class Namespace(BaseNamespace):
+
+    def Checkrecords():
+        print('got recordinfo')
+        r = requests.get(Status.url + '/settingz')
+
+        print('Record info:' + r.text)
+        jsonObject = json.loads(r.text)
+        RecordNow = False
+        for key in jsonObject:
+            field = key['setname']
+            value = key['value']
+            if field == 'recordid':
+                Status.recordId = value
+
+            if field == 'interval':
+                Status.recordInterval = int(value)
+
+            if field == 'mode':
+                Status.mode = value
+                print('mode:' + value)
+
+            if field == 'currentrecord':
+                if value != 'none':
+                    RecordNow = True
+
+        if RecordNow:
+            Status.RecordData = True
+            print('record status set to true')
+        else:
+            Status.RecordData = False
+            print('record status set to false')
 
     def on_connect(self):
         Status.isConnected = True
         Status.RecordData = False
+        print('Connected to server')
         self.emit('join', 'raspberrypi zero joined at ' +
                   str(datetime.datetime.now()))
         self.emit('targettemp', str(Status.TempTarget))
-        self.emit('recordcheck', 'check')
+        Namespace.Checkrecords()
 
     def on_reconnect(self):
+        self.emit('recordcheck', 'check')
         print('raspberry pi reconnected')
         self.emit('join', 'raspberry pi Zer0 reconnected')
         self.emit('targettemp', str(Status.TempTarget))
@@ -73,39 +141,14 @@ class Namespace(BaseNamespace):
         if data == 'True':
             # Status.RecordData = True
             print('Fetching New Record Data')
-            self.emit('recordcheck', 'check')
+            time.sleep(5)
+            Namespace.Checkrecords()
 
         else:
             Status.RecordData = False
             Status.recordId = '0'
             Status.recordInterval = 4
             print('Stop Recording Data')
-
-    def on_recordinfo(self, *args):
-        print('got recordinfo')
-        Status.LoadConfig()
-        data = Status.SortData(str(args), '|', '|')
-        jsonObject = json.loads(data)
-        RecordNow = False
-
-        for key in jsonObject:
-            value = jsonObject[key]
-            if key == 'recordid':
-                Status.recordId = value
-
-            if key == 'interval':
-                Status.recordInterval = int(value)
-
-            if key == 'currentrecord':
-                if value != 'none':
-                    RecordNow = True
-
-            print('RecordInfo: ' + key + 'Value:' + value)
-
-        if RecordNow:
-            Status.RecordData = True
-        else:
-            Status.RecordData = False
 
     def on_gettemptarget(self, *args):
         Status.LoadConfig()
@@ -117,9 +160,15 @@ class Namespace(BaseNamespace):
         data = Status.SortData(str(args), '{', '}')
         Status.TempTarget = float(data)
         Status.WriteConfig('TempTarget', str(Status.TempTarget))
+        print('target changed to: ' + data)
 
     def on_picheck(self, *args):
         data = Status.SortData(str(args), '{', '}')
         if data == 'ping':
             self.emit('picheck', 'pong')
             print('Response pong was sent')
+
+    def on_mode(self, *args):
+        data = Status.SortData(str(args), '{', '}')
+        Status.mode = data
+        print('Mode changed to:' + data)

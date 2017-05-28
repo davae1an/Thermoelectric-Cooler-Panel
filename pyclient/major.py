@@ -9,10 +9,10 @@ from socketIO_client import SocketIO
 from threading import Thread
 from signal import pause
 import json
-# import datetime
-import logging
-logging.getLogger('requests').setLevel(logging.WARNING)
-logging.basicConfig(level=logging.DEBUG)
+from datetime import datetime
+# import logging
+# logging.getLogger('requests').setLevel(logging.WARNING)
+# logging.basicConfig(level=logging.DEBUG)
 
 # Raspberry Pi pin configuration:
 # Note this might need to be changed to 21 for older revision Pi's.
@@ -37,34 +37,38 @@ lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
 RadFan = PWMOutputDevice(13, 100)
 Pump = LED(19)
 Peltier = PWMOutputDevice(26, 100)
+# OutSideFan = PWMOutputDevice(22, 100)
 
 # Peltier = LED(8)
 interval = 1
 socketIO = SocketIO('localhost', 3000, Namespace)
 
+statz = Status()
+tempchk = Tempchecker
+
 
 def turnup():
     # inside_temp_c, inside_temp_f = Tempchecker.read_inside_temp()
-    Status.TempTarget = Status.TempTarget + 0.5
-    Status.WriteConfig('TempTarget', str(Status.TempTarget))
-    print('Turn up to: ' + str(Status.TempTarget))
+    statz.TempTarget = statz.TempTarget + 0.5
+    statz.WriteConfig('TempTarget', str(statz.TempTarget))
+    print('Turn up to: ' + str(statz.TempTarget))
     lcd.clear()
-    lcd.message('Target:' + str(Status.TempTarget) + ' ' + chr(223) + 'C')
+    lcd.message('Target:' + str(statz.TempTarget) + ' ' + chr(223) + 'C')
 
-    if Status.isConnected is True:
-        socketIO.emit('targettemp', str(Status.TempTarget))
+    if statz.isConnected is True:
+        socketIO.emit('targettemp', str(statz.TempTarget))
 
 
 def turndown():
-    Status.TempTarget = Status.TempTarget - 0.5
-    Status.WriteConfig('TempTarget', str(Status.TempTarget))
-    print('Turn down to: ' + str(Status.TempTarget))
+    statz.TempTarget = statz.TempTarget - 0.5
+    statz.WriteConfig('TempTarget', str(statz.TempTarget))
+    print('Turn down to: ' + str(statz.TempTarget))
 
     lcd.clear()
-    lcd.message('Target:' + str(Status.TempTarget) + ' ' + chr(223) + 'C')
+    lcd.message('Target:' + str(statz.TempTarget) + ' ' + chr(223) + 'C')
 
-    if Status.isConnected is True:
-        socketIO.emit('targettemp', str(Status.TempTarget))
+    if statz.isConnected is True:
+        socketIO.emit('targettemp', str(statz.TempTarget))
 
 
 def buttonwait():
@@ -78,49 +82,51 @@ def buttonwait():
 def getTemps():
 
     while True:
-        inside_temp_c, inside_temp_f = Tempchecker.read_inside_temp()
-        housing_temp_c, housing_temp_f = Tempchecker.read_housing_temp()
-        outside_temp_c, outside_temp_f = Tempchecker.read_outside_temp()
+        inside_temp_c, inside_temp_f = tempchk.read_inside_temp()
+        housing_temp_c, housing_temp_f = tempchk.read_housing_temp()
+        outside_temp_c, outside_temp_f = tempchk.read_outside_temp()
 
         print('Inside: ' + str(inside_temp_c) +
               ' Housing: ' + str(housing_temp_c) +
               ' Outisde: ' + str(outside_temp_c) +
-              ' Target: ' + str(Status.TempTarget))
+              ' Target: ' + str(statz.TempTarget) +
+              ' Time: ' + datetime.now().strftime('%I:%M:%S %p'))
 
-        if Status.isConnected is True:
+        if statz.isConnected is True:
             socketIO.emit('tempdata', json.dumps(
                 {
                     'tempinside': str(inside_temp_c),
                     'temphousing': str(housing_temp_c),
                     'tempoutside': str(outside_temp_c),
-                    'radiatorFan': Status.radiatorFan,
-                    'peltier': Status.peltierCheck,
-                    'pump': Status.pumpCheck,
-                    'insideFan': Status.insideFanCheck
+                    'radiatorFan': statz.radiatorFan,
+                    'peltier': statz.peltierCheck,
+                    'pump': statz.pumpCheck,
+                    'insideFan': statz.insideFanCheck,
+                    'time': datetime.now().strftime('%I:%M:%S %p')
                 }, sort_keys=False, indent=4))
 
         lcd.clear()
         lcd.message('Current:' + str(inside_temp_c)[:4] + ' ' +
                     chr(223) + 'C' + '\n' + ' Target:' +
-                    str(Status.TempTarget) + ' ' + chr(223) + 'C')
+                    str(statz.TempTarget) + ' ' + chr(223) + 'C')
 
-        if inside_temp_c > Status.TempTarget:
+        if inside_temp_c > statz.TempTarget:
             if Peltier.is_active is False:
-                Peltier.value = 0.75
+                Peltier.value = 0
                 Peltier.toggle()
                 Pump.on()
-                Status.peltierCheck = "ON"
+                statz.peltierCheck = "ON"
                 RadFan.value = 0
                 RadFan.toggle()
-                Status.radiatorFan = 'ON'
-                print('Changed to ' + Status.peltierCheck)
+                statz.radiatorFan = 'ON'
+                print('Changed to ' + statz.peltierCheck)
             else:
                 print('Peltier is already on')
         else:
             if Peltier.is_active is True:
                 Peltier.off()
-                Status.peltierCheck = "OFF"
-                print('Changed to ' + Status.peltierCheck)
+                statz.peltierCheck = "OFF"
+                print('Changed to ' + statz.peltierCheck)
 
     time.sleep(interval)
 
@@ -128,25 +134,25 @@ def getTemps():
 def radiatorsys():
     while True:
 
-        if Status.peltierCheck == 'ON':
+        if statz.peltierCheck == 'ON':
             Pump.on()
-            Status.pumpCheck == 'ON'
+            statz.pumpCheck == 'ON'
             if RadFan.is_active is False:
                 RadFan.value = 0
                 RadFan.toggle()
-                Status.radiatorFan = 'ON'
+                statz.radiatorFan = 'ON'
             else:
                 print('Fan is already on')
         else:
             print('Start Sleeping')
-            time.sleep(180)
+            time.sleep(60)
             print('Finish sleep')
             Pump.off()
             print('pump off')
-            Status.pumpCheck == 'OFF'
+            statz.pumpCheck == 'OFF'
             if RadFan.is_active is True:
                 RadFan.off()
-                Status.radiatorFan = 'OFF'
+                statz.radiatorFan = 'OFF'
                 print('Fan off')
 
         time.sleep(1)
@@ -155,20 +161,20 @@ def radiatorsys():
 def recorder():
     while True:
 
-        if Status.RecordData is True:
-            inside_temp_c, inside_temp_f = Tempchecker.read_inside_temp()
-            housing_temp_c, housing_temp_f = Tempchecker.read_housing_temp()
-            outside_temp_c, outside_temp_f = Tempchecker.read_outside_temp()
-            print('Sendind data to express js')
+        if statz.RecordData is True:
+            inside_temp_c, inside_temp_f = tempchk.read_inside_temp()
+            housing_temp_c, housing_temp_f = tempchk.read_housing_temp()
+            outside_temp_c, outside_temp_f = tempchk.read_outside_temp()
+            print('Sendind data to server')
             socketIO.emit('tempadd', json.dumps(
                 {
-                    'recordId': str(Status.recordId),
+                    'recordId': str(statz.recordId),
                     'tempinside': str(inside_temp_c),
                     'temphousing': str(housing_temp_c),
                     'tempoutside': str(outside_temp_c)
                 }, sort_keys=False, indent=4))
 
-        time.sleep(Status.recordInterval)
+        time.sleep(statz.recordInterval)
 
 
 def connector():
@@ -177,12 +183,13 @@ def connector():
 
 Status.LoadConfig()
 r = Thread(target=radiatorsys)
-r.start()
 rec = Thread(target=recorder)
-rec.start()
 b = Thread(target=buttonwait)
-b.start()
 g = Thread(target=getTemps)
-g.start()
 s = Thread(target=connector)
+
+r.start()
+rec.start()
+b.start()
+g.start()
 s.start()

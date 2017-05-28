@@ -11,6 +11,10 @@ class Socketz {
     socket.emit('picheck', '{ping}')
   }
 
+  changemode(mode) {
+    socket.emit('mode', mode)
+    console.log('mode changed to: ' + mode)
+  }
 
 
   changetemp() {
@@ -37,6 +41,20 @@ class Socketz {
         store.pump = jsondata.pump;
         store.insideFan = jsondata.insideFan
         console.log('inside: ' + store.tempinside + ' pump: ' + store.temphousing + ' outside: ' + store.tempoutside + ' radiatorFan: ' + jsondata.radiatorFan);
+        store.insidegrid.push(parseFloat(jsondata.tempinside))
+        store.outsidegrid.push(parseFloat(jsondata.tempoutside))
+        store.housinggrid.push(parseFloat(jsondata.temphousing))
+        store.timegrid.push(jsondata.time)
+
+        if (store.timegrid.length >= 15) {
+          // shift() removes first row of array
+          store.timegrid.shift()
+          store.insidegrid.shift()
+          store.outsidegrid.shift()
+          store.housinggrid.shift()
+
+        }
+
       });
 
       socket.on('disconnect', function(data) {
@@ -54,10 +72,6 @@ class Socketz {
       socket.on('join', function(data) {
         console.log('Recieved: ' + data)
       });
-
-      // socket.on('recordinfo', function(data) {
-      //   console.log('Recieved: ' + data)
-      // });
 
       socket.on('picheck', function(data) {
         console.log('picheck(rec) : ' + data)

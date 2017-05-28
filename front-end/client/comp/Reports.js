@@ -111,6 +111,7 @@ export default class Reports extends Component {
   populatelist() {
     console.log('populating list')
     this.listz.length = 0
+    this.tablerows.length = 0
     var a = this;
     axios.get(this.props.checker.apiserver + '/records')
       .then(function(response) {

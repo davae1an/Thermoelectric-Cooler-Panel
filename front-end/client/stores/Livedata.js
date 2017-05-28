@@ -5,10 +5,16 @@ class Livedata {
   @observable targetTemp = 10
 
   @observable isConnected = false
-  @observable PiOnline = true
+  @observable PiOnline = false
   @observable tempinside = 0;
   @observable tempoutside = 0;
   @observable temphousing = 0;
+  @observable mode = 'high';
+
+  insidegrid = []
+  outsidegrid = []
+  housinggrid = []
+  timegrid = []
 
   @observable timerasp = ''
   @observable daterasp = ''

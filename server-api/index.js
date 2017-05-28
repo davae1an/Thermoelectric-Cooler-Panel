@@ -22,26 +22,6 @@ db.serialize(function() {
 
   console.log('Checking settingz table')
 
-  db.get('SELECT setname FROM settingz WHERE setname=(?)', 'lastrecord', function(err, row) {
-
-    if (row == undefined) {
-      console.log('lastrecord not found adding to table')
-      db.serialize(function() {
-        db.run('INSERT INTO settingz (setname, value) VALUES (?,?)', [
-          'lastrecord', 'none'
-        ], function(error) {
-          if (error) {
-            console.log('Cant insert data Error: ' + error)
-          }
-        })
-      })
-
-    } else {
-      console.log('lastrecord exsists already')
-    }
-
-  })
-
   db.get('SELECT setname FROM settingz WHERE setname=(?)', 'currentrecord', function(err, row) {
 
     if (row == undefined) {
@@ -61,13 +41,13 @@ db.serialize(function() {
 
   })
 
-  db.get('SELECT setname FROM settingz WHERE setname=(?)', 'recordData', function(err, row) {
+  db.get('SELECT setname FROM settingz WHERE setname=(?)', 'mode', function(err, row) {
 
     if (row == undefined) {
-      console.log('recordData not found adding to table')
+      console.log('mode not found adding to table')
       db.serialize(function() {
         db.run('INSERT INTO settingz (setname, value) VALUES (?,?)', [
-          'recordData', 'false'
+          'mode', 'high'
         ], function(error) {
           if (error) {
             console.log('Cant insert data Error: ' + error)
@@ -75,7 +55,7 @@ db.serialize(function() {
         })
       })
     } else {
-      console.log('recordData exsists already')
+      console.log('mode exsists already')
     }
 
   })
@@ -154,25 +134,15 @@ io.on('connection', function(client) {
   });
 
   client.on('recordcheck', function(data) {
-    //checks if recording data
-    if (data == 'check') {
-      console.log('picheck: ' + data)
-      db.serialize(function() {
-        console.log('Getting record data from database')
-        db.all('SELECT setname, value FROM settingz', function(err, rows) {
-          console.log(rows)
-          client.broadcast.emit('recordinfo', '|' + JSON.stringify(rows) + '|')
-
-        })
-      })
-    }
+    console.log('send record check')
     client.broadcast.emit('picheck', data)
+    client.emit('changerecord', 'check')
 
   });
 
   client.on('tempadd', function(data) {
     var jsondata = JSON.parse(data);
-
+    console.log('adding tempdata')
     db.serialize(function() {
       db.run('INSERT INTO pidata (outside, inside, pump, rec_id) VALUES ((?),(?),(?),(?))', [jsondata.tempinside, jsondata.tempoutside, jsondata.temphousing, jsondata.recordId], function(error) {
         if (error) {
@@ -188,6 +158,22 @@ io.on('connection', function(client) {
   client.on('disconnect', function(data) {
     console.log('User disconnected:' + data);
   });
+
+  client.on('mode', function(data) {
+
+
+    db.serialize(function() {
+      db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', [data, 'mode'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+    })
+
+    client.broadcast.emit('mode', '{' + data + '}')
+
+  });
+
 });
 
 app.use(function(req, res, next) {
@@ -260,17 +246,10 @@ app.post('/records/:name/:interval', function(req, res) {
         console.log(error)
       }
     })
-    db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', ['true', 'RecordData'], function(error) {
-      if (error) {
-        console.log(error)
-      }
-    })
 
-
+    res.send('added')
+    io.emit('record', '{True}')
   })
-  res.send('added')
-
-  io.emit('record', '{True}')
 
 })
 
