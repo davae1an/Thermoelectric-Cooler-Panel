@@ -92,7 +92,7 @@ export default class Graphpanel extends Component {
 
       },
       {
-        label: 'Pump Housing Temp',
+        label: 'Housing Temp',
         fill: true,
         lineTension: 0.4,
         backgroundColor: 'rgba(33,0,127,0.5411764705882353)',

@@ -35,10 +35,9 @@ export default class Headerz extends Component {
         response.data.map(function(data) {
 
           if (data.setname == 'mode') {
-            a.props.checker.mode = data.value
+            a.props.checker.modez = data.value
             console.log('Mode set to:' + data.value)
           }
-
 
         })
       })
@@ -49,15 +48,13 @@ export default class Headerz extends Component {
 
   modestatus(event) {
     if (event.target.name == 'radio-high') {
-      this.props.checker.mode = 'high'
-      this.props.socketz.changemode('high')
+      this.props.checker.modez = 'hipro'
+      this.props.socketz.changemode('hipro')
     } else {
-
-      this.props.checker.mode = 'eco'
+      this.props.checker.modez = 'eco'
       this.props.socketz.changemode('eco')
     }
-
-    console.log('Mode: ' + this.props.checker.mode)
+    console.log('Mode: ' + this.props.checker.modez)
   }
 
   render() {
@@ -80,8 +77,8 @@ export default class Headerz extends Component {
               </Box>
               <Box flex={true} justify='end' direction='row' responsive={false}>
                 <Box direction='column'>
-                  <RadioButton id='mode-1' name='radio-high' label='High Performance' checked={this.props.checker.mode == 'high'} onChange={this.modestatus.bind(this)} />
-                  <RadioButton id='mode-2' name='radio-eco' label='Eco (Solar Mode)' checked={this.props.checker.mode == 'eco'} onChange={this.modestatus.bind(this)} />
+                  <RadioButton id='mode-1' name='radio-high' label='High Performance' checked={this.props.checker.modez == 'hipro'} onChange={this.modestatus.bind(this)} />
+                  <RadioButton id='mode-2' name='radio-eco' label='Eco (Solar Mode)' checked={this.props.checker.modez == 'eco'} onChange={this.modestatus.bind(this)} />
                 </Box>
                 <Menu icon={< Actions />} dropAlign={{ 'right': 'right', 'top': 'top' }}>
                   <Anchor href='#' className='active'>

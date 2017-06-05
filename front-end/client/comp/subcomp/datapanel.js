@@ -18,35 +18,71 @@ export default class Datapanel extends Component {
   }
 
   turnuptemp() {
+    if (this.props.storez.targetTemp == 40) {
 
-    console.log('Up')
-    var isConnected = this.props.storez.isConnected
-    if (isConnected == true) {
-      console.log('Sending temp')
-      this.props.storez.targetTemp = this.props.storez.targetTemp + 0.5
-      this.props.socketz.changetemp()
-    // return (<Status value='ok'/>)
+      console.log('Capped at 40 deg')
+      var isConnected = this.props.storez.isConnected
+      if (isConnected == true) {
+        console.log('Sending temp')
+        this.props.storez.targetTemp = 40
+        this.props.socketz.changetemp()
+      // return (<Status value='ok'/>)
+      } else {
+        console.log('Not Sending not connected')
+      // return (<Status value='critical'/>)
+      }
+
+
     } else {
-      console.log('Not Sending not connected')
-    // return (<Status value='critical'/>)
+      console.log('Up')
+      var isConnected = this.props.storez.isConnected
+      if (isConnected == true) {
+        console.log('Sending temp')
+        this.props.storez.targetTemp = this.props.storez.targetTemp + 0.5
+        this.props.socketz.changetemp()
+      // return (<Status value='ok'/>)
+      } else {
+        console.log('Not Sending not connected')
+      // return (<Status value='critical'/>)
+      }
     }
+
   }
 
 
 
   turndowntemp() {
-    console.log('Down')
-    var isConnected = this.props.storez.isConnected
-    if (isConnected == true) {
-      console.log('Sending temp')
-      this.props.storez.targetTemp = this.props.storez.targetTemp - 0.5
-      this.props.socketz.changetemp()
-    // return (<Status value='ok'/>)
-    } else {
-      console.log('Not Sending not connected')
-    // return (<Status value='critical'/>)
-    }
+    if (this.props.storez.targetTemp == 0) {
 
+      console.log('Capped at 0')
+      var isConnected = this.props.storez.isConnected
+      if (isConnected == true) {
+        console.log('Sending temp')
+        this.props.storez.targetTemp = 0
+        this.props.socketz.changetemp()
+      // return (<Status value='ok'/>)
+      } else {
+        console.log('Not Sending not connected')
+      // return (<Status value='critical'/>)
+      }
+
+
+    } else {
+
+      console.log('Down')
+      var isConnected = this.props.storez.isConnected
+      if (isConnected == true) {
+        console.log('Sending temp')
+        this.props.storez.targetTemp = this.props.storez.targetTemp - 0.5
+        this.props.socketz.changetemp()
+      // return (<Status value='ok'/>)
+      } else {
+        console.log('Not Sending not connected')
+      // return (<Status value='critical'/>)
+      }
+
+
+    }
   }
 
 
@@ -67,7 +103,7 @@ export default class Datapanel extends Component {
           </Box>
           <Box responsive={false} align='center' margin='small' pad='small'>
             <Meter colorIndex='light-1' type='arc' size='xsmall' value={this.props.storez.temphousing} />
-            <Value label='Pump Sensor' value={this.props.storez.temphousing} units='&#8451;' size='small' />
+            <Value label='Housing Sensor' value={this.props.storez.temphousing} units='&#8451;' size='small' />
           </Box>
           <Box>
             <Fanpelt storez={this.props.storez} />

@@ -16,7 +16,7 @@ db.serialize(function() {
   db.run('CREATE TABLE IF NOT EXISTS pirecords (' +
     'rec_id INTEGER PRIMARY KEY, name TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)')
   db.run('CREATE TABLE IF NOT EXISTS pidata (' +
-    'outside TEXT, inside TEXT, pump TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP, rec_id INTEGER,' +
+    'outside TEXT, inside TEXT, pump TEXT, date TEXT, rec_id INTEGER,' +
     'FOREIGN KEY(rec_id) REFERENCES pirecords(rec_id))')
   db.run('CREATE TABLE IF NOT EXISTS settingz (setname TEXT, value TEXT)')
 
@@ -47,7 +47,7 @@ db.serialize(function() {
       console.log('mode not found adding to table')
       db.serialize(function() {
         db.run('INSERT INTO settingz (setname, value) VALUES (?,?)', [
-          'mode', 'high'
+          'mode', 'hipro'
         ], function(error) {
           if (error) {
             console.log('Cant insert data Error: ' + error)
@@ -144,7 +144,7 @@ io.on('connection', function(client) {
     var jsondata = JSON.parse(data);
     console.log('adding tempdata')
     db.serialize(function() {
-      db.run('INSERT INTO pidata (outside, inside, pump, rec_id) VALUES ((?),(?),(?),(?))', [jsondata.tempinside, jsondata.tempoutside, jsondata.temphousing, jsondata.recordId], function(error) {
+      db.run('INSERT INTO pidata (outside, inside, pump, date, rec_id) VALUES ((?),(?),(?),(?),(?))', [jsondata.tempoutside, jsondata.tempinside, jsondata.temphousing, jsondata.time, jsondata.recordId], function(error) {
         if (error) {
           console.log(error)
         }
@@ -161,6 +161,19 @@ io.on('connection', function(client) {
 
   client.on('mode', function(data) {
 
+    db.serialize(function() {
+      db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', [data, 'mode'], function(error) {
+        if (error) {
+          console.log(error)
+        }
+      })
+    })
+
+    console.log('mode updated to: ' + data)
+    client.broadcast.emit('pimode', '{' + data + '}')
+  });
+
+  client.on('changemode', function(data) {
 
     db.serialize(function() {
       db.run('UPDATE settingz SET value =(?) WHERE setname =(?)', [data, 'mode'], function(error) {
@@ -170,9 +183,10 @@ io.on('connection', function(client) {
       })
     })
 
-    client.broadcast.emit('mode', '{' + data + '}')
-
+    console.log('(changemode) mode updated to: ' + data)
+    client.broadcast.emit('climode', data)
   });
+
 
 });
 

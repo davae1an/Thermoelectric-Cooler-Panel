@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 import store from './Livedata';
 
 var socket = io('http://raspberrypi.local:3000');
+// var socket = io('http://localhost:3000');
 
 class Socketz {
 
@@ -11,11 +12,10 @@ class Socketz {
     socket.emit('picheck', '{ping}')
   }
 
-  changemode(mode) {
-    socket.emit('mode', mode)
-    console.log('mode changed to: ' + mode)
+  changemode(modes) {
+    socket.emit('mode', modes)
+    console.log('mode changed to: ' + modes)
   }
-
 
   changetemp() {
     socket.emit('changetemp', '{' + parseFloat(store.targetTemp) + '}')
@@ -40,7 +40,8 @@ class Socketz {
         store.peltier = jsondata.peltier;
         store.pump = jsondata.pump;
         store.insideFan = jsondata.insideFan
-        console.log('inside: ' + store.tempinside + ' pump: ' + store.temphousing + ' outside: ' + store.tempoutside + ' radiatorFan: ' + jsondata.radiatorFan);
+        store.housingFan = jsondata.housingFan
+        console.log('inside: ' + store.tempinside + ' pump: ' + store.temphousing + ' outside: ' + store.tempoutside + ' radiatorFan: ' + jsondata.radiatorFan + ' hosuingFan: ' + jsondata.housingFan + ' insideFan: ' + jsondata.insideFan);
         store.insidegrid.push(parseFloat(jsondata.tempinside))
         store.outsidegrid.push(parseFloat(jsondata.tempoutside))
         store.housinggrid.push(parseFloat(jsondata.temphousing))
@@ -57,11 +58,23 @@ class Socketz {
 
       });
 
+      socket.on('climode', function(data) {
+        // store.isConnected = true
+        console.log('Mode data recieved:' + data)
+        if (data == 'eco') {
+          store.modez = 'eco'
+        } else {
+          store.modez = 'hipro'
+        }
+
+      });
+
       socket.on('disconnect', function(data) {
         store.isConnected = false
       });
 
       socket.on('targettemp', function(data) {
+        console.log('target changed to: ' + data)
         store.targetTemp = parseFloat(data)
       });
 

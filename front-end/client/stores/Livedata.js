@@ -9,7 +9,7 @@ class Livedata {
   @observable tempinside = 0;
   @observable tempoutside = 0;
   @observable temphousing = 0;
-  @observable mode = 'high';
+  @observable modez = '';
 
   insidegrid = []
   outsidegrid = []
@@ -23,10 +23,13 @@ class Livedata {
   @observable pump = 'OFF'
   @observable radiatorFan = 'OFF'
   @observable insideFan = 'OFF'
+  @observable housingFan = 'OFF'
 
   //Api Stuff below
+
   apiserver = 'http://raspberrypi.local:3000'
 
+  // apiserver = 'http://localhost:3000'
 
 }
 

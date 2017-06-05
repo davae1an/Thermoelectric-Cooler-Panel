@@ -218,7 +218,7 @@ export default class Reports extends Component {
             </Header>
             <Box>
               <Table>
-                <TableHeader labels={['ID', 'Outside Temp.', 'Inside Temp.', 'Pump Housing Temp.', 'Time']} />
+                <TableHeader labels={['ID', 'Outside Temp.', 'Inside Temp.', 'Housing Temp.', 'Time']} />
                 <tbody>
                   {TableRowdata}
                 </tbody>

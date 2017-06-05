@@ -12,12 +12,13 @@ class Status(object):
     isConnected = False
     TempTarget = 25.0
     radiatorFan = 'OFF'
+    housingFan = 'OFF'
     peltierCheck = 'OFF'
     pumpCheck = 'OFF'
     insideFanCheck = 'OFF'  # <<config
     recordInterval = 1
     recordId = 0
-    mode = 'high'
+    mode = 'hipro'
 
     def SortData(data, char1, char2):
         Sorted = data[data.find(char1) + 1: data.find(char2)]
@@ -49,37 +50,6 @@ class Status(object):
 
         with open('config.json', 'w') as f:
             json.dump(config, f)
-
-    # def Checkrecords():
-    #     print('got recordinfo')
-    #     r = requests.get(Status.url + '/settingz')
-
-    #     print('Record info:' + r.text)
-    #     jsonObject = json.loads(r.text)
-    #     RecordNow = False
-    #     for key in jsonObject:
-    #         field = key['setname']
-    #         value = key['value']
-    #         if field == 'recordid':
-    #             Status.recordId = value
-
-    #         if field == 'interval':
-    #             Status.recordInterval = int(value)
-
-    #         if field == 'mode':
-    #             Status.mode = value
-    #             print('mode:' + value)
-
-    #         if field == 'currentrecord':
-    #             if value != 'none':
-    #                 RecordNow = True
-
-    #     if RecordNow:
-    #         Status.RecordData = True
-    #         print('record status set to true')
-    #     else:
-    #         Status.RecordData = False
-    #         print('record status set to false')
 
 
 class Namespace(BaseNamespace):
@@ -168,7 +138,7 @@ class Namespace(BaseNamespace):
             self.emit('picheck', 'pong')
             print('Response pong was sent')
 
-    def on_mode(self, *args):
+    def on_pimode(self, *args):
         data = Status.SortData(str(args), '{', '}')
         Status.mode = data
-        print('Mode changed to:' + data)
+        print('Mode changed to: ' + data)

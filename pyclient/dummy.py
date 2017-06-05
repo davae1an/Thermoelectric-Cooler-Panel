@@ -62,6 +62,11 @@ def getTemps():
                     'time': datetime.now().strftime('%I:%M:%S %p')
                 }, sort_keys=False, indent=4))
 
+        if (Status.mode == 'hipro'):
+            print('housing fan on high')
+        else:
+            print('housing fan on eco')
+
         if inside_temp_c > statz.TempTarget:
             statz.peltierCheck = "ON"
             statz.radiatorFan = 'ON'
@@ -87,7 +92,8 @@ def recorder():
                     'recordId': str(statz.recordId),
                     'tempinside': str(inside_temp_c),
                     'temphousing': str(housing_temp_c),
-                    'tempoutside': str(outside_temp_c)
+                    'tempoutside': str(outside_temp_c),
+                    'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }, sort_keys=False, indent=4))
 
         time.sleep(statz.recordInterval)
