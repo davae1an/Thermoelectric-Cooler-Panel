@@ -130,19 +130,20 @@ def getTemps():
               ' Target: ' + str(Status.TempTarget) +
               ' Time: ' + datetime.now().strftime('%I:%M:%S %p'))
 
-        if (housing_temp_c > 50) or (inside_temp_c > 40):
+        if (housing_temp_c > 70) or (inside_temp_c > 40):
             Peltier.off()
             time.sleep(30000)
 
         if (Status.mode == 'hipro'):
             HousingFan.value = 0
+            Status.voltage = '7.28'
             HousingFan.toggle()
             Status.housingFan = 'ON'
             print('housing fan on high')
 
             if inside_temp_c > Status.TempTarget:
                 if Peltier.is_active is False:
-                    Peltier.value = 0.25
+                    Peltier.value = 0
                     Peltier.toggle()
                     Pump.on()
                     Status.pumpCheck = "ON"
@@ -169,10 +170,10 @@ def getTemps():
             HousingFan.toggle()
             print('housing fan on eco')
             Status.housingFan = 'ON'
-
+            Status.voltage = '5.32'
             if inside_temp_c > Status.TempTarget:
                 if Peltier.is_active is False:
-                    Peltier.value = 0.5
+                    Peltier.value = 0.25
                     Peltier.toggle()
                     Pump.on()
                     Status.pumpCheck = "ON"
@@ -207,7 +208,8 @@ def getTemps():
                     'insideFan': Status.insideFanCheck,
                     'housingFan': Status.housingFan,
                     'time': datetime.now().strftime('%I:%M:%S %p'),
-                    'mode': Status.mode
+                    'mode': Status.mode,
+                    'voltage': Status.voltage
                 }, sort_keys=False, indent=4))
 
         lcd.clear()

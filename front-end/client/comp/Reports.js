@@ -9,7 +9,10 @@ import RefreshIcon from 'grommet/components/icons/base/Refresh';
 import { observable, autorun } from 'mobx';
 import { observer, computed } from 'mobx-react';
 import Animate from 'grommet/components/Animate';
-import Recordctrl from './subcomp/recordctrl'
+import Recordctrl from './subcomp/recordctrl';
+import FileDownload from 'react-file-download';
+import { CSVLink, CSVDownload } from 'react-csv';
+
 
 
 @observer
@@ -22,6 +25,7 @@ export default class Reports extends Component {
   listid = undefined
   @observable currentrecord = undefined
   selected = 0
+  iframeSrc = undefined
 
 
   constructor(props) {
@@ -158,8 +162,26 @@ export default class Reports extends Component {
     }
   }
 
+  MyIframe() {
+    return (
+      <div style={{ display: 'none' }}>
+        <iframe src={this.props.iframeSrc} />
+      </div>
+      );
+  }
+
+  ExportBtn() {
+    if (this.tablerows.length != 0) {
+      return (
+        <Button label='Export to excel' href={this.props.checker.apiserver + '/export/' + this.listid} />
+      )
+    }
+  }
+
+
 
   render() {
+
 
 
 
@@ -194,6 +216,7 @@ export default class Reports extends Component {
       <div>
         <Box colorIndex='neutral-2'>
           <Label align='center' size='medium'>Reports</Label>
+          {this.MyIframe}
         </Box>
         <Split flex='right'>
           <Box colorIndex='neutral-4-a' direction='column' pad='small' full='vertical'>
@@ -215,6 +238,9 @@ export default class Reports extends Component {
           <Box direction='column'>
             <Header size='small' colorIndex='neutral-4'>
               <Recordctrl pop={this.populatelist} checker={this.props.checker} socketz={this.props.socketz} />
+              <Box flex={true} justify='end' direction='row' responsive={false}>
+                {this.ExportBtn()}
+              </Box>
             </Header>
             <Box>
               <Table>

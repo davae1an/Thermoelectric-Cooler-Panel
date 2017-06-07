@@ -70,7 +70,6 @@ export default class Headerz extends Component {
               <Box pad={{ 'between': 'medium' }} flex={true} justify='end' direction='row' responsive={false}>
                 <Menu direction='row' size='small' dropAlign={{ 'right': 'right' }}>
                   <Anchor path='/'>Home</Anchor>
-                  <Anchor path='/calculations'>Calculations</Anchor>
                   <Anchor path='/reports'>Reports</Anchor>
                   <Anchor path='/about'>About</Anchor>
                 </Menu>

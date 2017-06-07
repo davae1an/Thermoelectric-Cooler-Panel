@@ -5109,6 +5109,10 @@ react-dom@^15.3.0, react-dom@^15.4.2:
     object-assign "^4.1.0"
     prop-types "~15.5.7"
 
+react-file-download@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/react-file-download/-/react-file-download-0.3.4.tgz#4e1cfc7a47df6eeb299dfd845b99676cdedab5d2"
+
 react-intl@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-2.2.3.tgz#8eebb03cddc38b337ed22fab78037ab53a594270"

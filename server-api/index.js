@@ -4,7 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var sqlite3 = require('sqlite3').verbose()
-var squel = require("squel");
+var json2xls = require('json2xls');
 
 var db = new sqlite3.Database('../pyclient/data.db3');
 
@@ -213,6 +213,8 @@ app.use(bodyParser.json()); app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+app.use(json2xls.middleware);
+
 app.get('/', function(req, res) {
   res.send('SmartCooler Api')
 })
@@ -349,6 +351,15 @@ app.put('/recordcmd/:cmd', function(req, res) {
 app.get('/pidata/:id', function(req, res) {
   db.all('SELECT * FROM pidata WHERE  rec_id=(?)', req.params.id, function(err, rows) {
     res.send(JSON.stringify(rows))
+  });
+})
+
+app.get('/export/:id', function(req, res) {
+
+  // var jsonArr = []
+  db.all('SELECT * FROM pidata WHERE  rec_id=(?)', req.params.id, function(err, rows) {
+    // res.send(JSON.stringify(rows))
+    res.xls('data.xlsx', rows);
   });
 })
 

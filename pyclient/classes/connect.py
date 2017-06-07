@@ -19,6 +19,7 @@ class Status(object):
     recordInterval = 1
     recordId = 0
     mode = 'hipro'
+    voltage = '0'
 
     def SortData(data, char1, char2):
         Sorted = data[data.find(char1) + 1: data.find(char2)]
